@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { server } from "../../../config";
+import Meta from "../../../components/Meta";
 // import { useRouter } from "next/router";
 
 export default function article({ article }) {
@@ -7,6 +9,7 @@ export default function article({ article }) {
 
   return (
     <>
+      <Meta title={article.title} description={article.excerpt} />
       <h1>{article.title}</h1>
       <p>{article.body}</p>
       <br />
@@ -14,6 +17,32 @@ export default function article({ article }) {
     </>
   );
 }
+
+export const getStaticProps = async (context) => {
+  const res = await fetch(`${server}/api/articles/${context.params.id}`);
+
+  const article = await res.json();
+
+  return {
+    props: {
+      article,
+    },
+  };
+};
+
+export const getStaticPaths = async () => {
+  const res = await fetch(`${server}/api/articles`);
+
+  const articles = await res.json();
+
+  const ids = articles.map((article) => article.id);
+  const paths = ids.map((id) => ({ params: { id: id.toString() } }));
+
+  return {
+    paths,
+    fallback: false,
+  };
+};
 
 /*
 getServerSideProps
@@ -46,19 +75,19 @@ getStaticProps
   you can write the server-side code directly in getStaticProps
 */
 
-export const getStaticProps = async (context) => {
-  const res = await fetch(
-    `https://jsonplaceholder.typicode.com/posts/${context.params.id}`
-  );
+// export const getStaticProps = async (context) => {
+//   const res = await fetch(
+//     `https://jsonplaceholder.typicode.com/posts/${context.params.id}`
+//   );
 
-  const article = await res.json();
+//   const article = await res.json();
 
-  return {
-    props: {
-      article,
-    },
-  };
-};
+//   return {
+//     props: {
+//       article,
+//     },
+//   };
+// };
 
 /*
 getStaticPaths
@@ -75,16 +104,16 @@ getStaticPaths
   getStaticPaths only runs at build time on server-side
 */
 
-export const getStaticPaths = async () => {
-  const res = await fetch(`https://jsonplaceholder.typicode.com/posts`);
+// export const getStaticPaths = async () => {
+//   const res = await fetch(`https://jsonplaceholder.typicode.com/posts`);
 
-  const articles = await res.json();
+//   const articles = await res.json();
 
-  const ids = articles.map((article) => article.id);
-  const paths = ids.map((id) => ({ params: { id: id.toString() } }));
+//   const ids = articles.map((article) => article.id);
+//   const paths = ids.map((id) => ({ params: { id: id.toString() } }));
 
-  return {
-    paths,
-    fallback: false,
-  };
-};
+//   return {
+//     paths,
+//     fallback: false,
+//   };
+// };
